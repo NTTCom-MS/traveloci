@@ -76,6 +76,7 @@ public class Travelo extends Builder {
                     
             //build
             try {
+                
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 StreamBuildListener sbl = new StreamBuildListener(baos);
                 
@@ -86,7 +87,7 @@ public class Travelo extends Builder {
                 
 
                 child = launcher.decorateFor(build.getBuiltOn()).launch()
-                  .cmds(args).envs(job.get("env")).stdout(sbl).pwd(build.getWorkspace()).start();
+                  .cmds(args).envs(job.get("env")).stdout(sbl).stderr(baos).pwd(build.getWorkspace()).start();
                 
                 while (child.isAlive()) {
                     baos.flush();
