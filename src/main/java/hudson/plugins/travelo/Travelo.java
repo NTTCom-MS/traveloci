@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -33,11 +34,13 @@ public class Travelo extends Builder {
     public String getTask() { return "8==D"; }
     
     @Override
-    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener)  {
+    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
         InputStream input;
+        boolean ret=true;
+        PrintStream logger = listener.getLogger();
         
         FilePath ws=build.getWorkspace();
-        System.out.println();
+
         try
         {
             input = new FileInputStream(new File(ws+"/.travis.yml"));
@@ -45,6 +48,7 @@ public class Travelo extends Builder {
         catch(FileNotFoundException e)
         {
             //TODO: afegit info error
+            logger.println("ERROR: .travis.yaml NOT found");
             return false;
         }
    
@@ -58,11 +62,16 @@ public class Travelo extends Builder {
 	    Map<String, String> job = include.get(i);
             
 	    //System.out.println("Element: " + job);
-            System.out.println("env:" + job.get("env"));
-            System.out.println("script:" + job.get("script"));
-	}
+            logger.println(" == JOB "+i+" ==");
+            logger.println("env:" + job.get("env"));
+            logger.println("script:" + job.get("script"));
+                    
+            //build.
+            
+            logger.println();
+        }
                 
-        return true;
+        return ret;
     }
     
     @Extension
