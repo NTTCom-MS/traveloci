@@ -3,12 +3,16 @@ package hudson.plugins.travelo;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Proc;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.util.ArgumentListBuilder;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -34,9 +38,11 @@ public class Travelo extends Builder {
     public String getTask() { return "8==D"; }
     
     @Override
+    @SuppressWarnings("SleepWhileInLoop")
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
         InputStream input;
         boolean ret=true;
+        Proc child=null;
         PrintStream logger = listener.getLogger();
         
         FilePath ws=build.getWorkspace();
@@ -65,10 +71,75 @@ public class Travelo extends Builder {
             logger.println(" == JOB "+i+" ==");
             logger.println("env:" + job.get("env"));
             logger.println("script:" + job.get("script"));
+            
+            Long startTime = System.currentTimeMillis();
                     
-            //build.
+            //build
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                StreamBuildListener sbl = new StreamBuildListener(baos);
+                
+                ArgumentListBuilder args = new ArgumentListBuilder();
+                args.add("/bin/bash");
+                args.add("-c");
+                args.add(job.get("script"));
+                
+
+                child = launcher.decorateFor(build.getBuiltOn()).launch()
+                  .cmds(args).envs(job.get("env")).stdout(sbl).pwd(build.getWorkspace()).start();
+                
+                while (child.isAlive()) {
+                    baos.flush();
+                    String s = baos.toString();
+                    baos.reset();
+
+                    listener.getLogger().print(s);
+                    listener.getLogger().flush();
+                    
+                    Thread.sleep(2);
+                }
+                
+                ret = child.join() == 0;
+            }
+            catch(IOException e) {
+                logger.println("IOExcetion - WTF?");
+                e.printStackTrace(logger);
+                ret=false;
+                if(child!=null)
+                {
+                    try {
+                            child.kill();
+                    } catch (IOException ex) {
+                        logger.println("inception IOExcetion");
+                    } catch (InterruptedException ex) {
+                        logger.println("1 exception throws an exception, 2 exceptions throws an exception, 3 exceptions...");
+                    }
+                }
+
+            }
+            catch(InterruptedException e) {
+                logger.println("InterruptedException - user aboeted?");
+                e.printStackTrace(logger);
+                ret=false;
+                if(child!=null)
+                {
+                    try {
+                            child.kill();
+                    } catch (IOException ex) {
+                        logger.println("inception IOExcetion");
+                    } catch (InterruptedException ex) {
+                        logger.println("1 exception throws an exception, 2 exceptions throws an exception, 3 exceptions...");
+                    }
+                }
+            }
+                    
+                    
+            Long endTime = System.currentTimeMillis();        
+            
+            logger.println("Total time spent: "+(endTime-startTime)+" ms");
             
             logger.println();
+            logger.flush();
         }
                 
         return ret;
