@@ -6,8 +6,16 @@ import hudson.Launcher;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Map;
 
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import org.yaml.snakeyaml.Yaml;
 
 
 /**
@@ -26,9 +34,33 @@ public class Travelo extends Builder {
     
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener)  {
-        FilePath ws=build.getWorkspace();
+        InputStream input;
         
-        System.out.println(ws);
+        FilePath ws=build.getWorkspace();
+        System.out.println();
+        try
+        {
+            input = new FileInputStream(new File(ws+"/.travis.yml"));
+        }
+        catch(FileNotFoundException e)
+        {
+            //TODO: afegit info error
+            return false;
+        }
+   
+        Yaml yaml = new Yaml();
+        Map<String, Object> travis = (Map<String, Object>) yaml.load(input);
+        Map<String, Object> matrix = (Map<String, Object>) travis.get("matrix");
+        ArrayList<Map<String, String>> include = (ArrayList<Map<String, String>>) matrix.get("include");
+        
+        // Loop through include list
+	for (int i = 0; i < include.size(); i++) {
+	    Map<String, String> job = include.get(i);
+            
+	    //System.out.println("Element: " + job);
+            System.out.println("env:" + job.get("env"));
+            System.out.println("script:" + job.get("script"));
+	}
                 
         return true;
     }
@@ -43,7 +75,7 @@ public class Travelo extends Builder {
 
         @Override
         public String getDisplayName() {
-            return "execute travelo task";
+            return "execute traveloci task";
         }
     }
 }
