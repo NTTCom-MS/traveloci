@@ -1,5 +1,6 @@
 package hudson.plugins.travelo;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -17,6 +18,10 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -74,7 +79,36 @@ public class Travelo extends Builder {
             logger.println("script:" + job.get("script"));
             
             Long startTime = System.currentTimeMillis();
-                    
+            
+            Pattern pattern = Pattern.compile("([a-zA-Z0-9_]*)=\"([^\"]*)\"");
+            Matcher matcher = pattern.matcher(job.get("env"));
+            EnvVars envvars;
+            
+            try {
+                envvars=build.getEnvironment(listener);
+                envvars.putAll(build.getBuildVariables());
+                
+                while (matcher.find()) {
+                    envvars.put(matcher.group(1), matcher.group(2));
+                }
+                logger.println();                
+                logger.println("env vars: "+envvars.toString());
+                logger.println();
+                
+                logger.println("map: "+envvars.descendingMap().toString());
+                logger.println();
+
+                
+            } catch (IOException e) {
+                logger.println("IOExcetion - WTF?");
+                e.printStackTrace(logger);
+                return false;
+            } catch (InterruptedException e) {
+                logger.println("InterruptedException - user cancelled?");
+                e.printStackTrace(logger);
+                return false;
+            }
+            
             //build
             try {
                 
@@ -84,11 +118,11 @@ public class Travelo extends Builder {
                 ArgumentListBuilder args = new ArgumentListBuilder();
                 args.add("/bin/bash");
                 args.add("-c");
-                args.add(job.get("env")+" "+job.get("script"));
+                args.add(job.get("script"));
                 
-
+                //job.get("env")
                 child = launcher.decorateFor(build.getBuiltOn()).launch()
-                  .cmds(args).stdout(sbl).stderr(baos).pwd(build.getWorkspace()).start();
+                  .cmds(args).envs(envvars.descendingMap()).stdout(sbl).stderr(baos).pwd(build.getWorkspace()).start();
                 
                 while (child.isAlive()) {
                     baos.flush();
