@@ -100,7 +100,8 @@ public class Travelo extends Builder {
                     Thread.sleep(2);
                 }
                 
-                ret = child.join() == 0;
+                if(child.join() != 0)
+                    ret=false;
             }
             catch(IOException e) {
                 logger.println("IOExcetion - WTF?");
