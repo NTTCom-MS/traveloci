@@ -138,6 +138,7 @@ public class Travelo extends Builder {
             Long endTime = System.currentTimeMillis();        
             
             logger.println("Total time spent: "+(endTime-startTime)+" ms");
+            logger.println("Job status: "+(ret?"OK":"FAILED"));
             
             logger.println();
             logger.flush();

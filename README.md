@@ -1,5 +1,11 @@
 # traveloci
 
+## build
+
+```
+# mvn -DskipTests package
+````
+
 ## install
 
 ## usage
@@ -125,7 +131,7 @@ F
 
 Failures:
 
-  1) hari with defaults for all parameters 
+  1) hari with defaults for all parameters
      Failure/Error: it { should contain_class('hari') }
      Puppet::Error:
        Could not find class hari for croscat.atlasit.local on node croscat.atlasit.local
