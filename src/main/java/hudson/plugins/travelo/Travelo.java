@@ -84,11 +84,11 @@ public class Travelo extends Builder {
                 ArgumentListBuilder args = new ArgumentListBuilder();
                 args.add("/bin/bash");
                 args.add("-c");
-                args.add(job.get("script"));
+                args.add(job.get("env")+" "+job.get("script"));
                 
 
                 child = launcher.decorateFor(build.getBuiltOn()).launch()
-                  .cmds(args).envs(job.get("env")).stdout(sbl).stderr(baos).pwd(build.getWorkspace()).start();
+                  .cmds(args).stdout(sbl).stderr(baos).pwd(build.getWorkspace()).start();
                 
                 while (child.isAlive()) {
                     baos.flush();
