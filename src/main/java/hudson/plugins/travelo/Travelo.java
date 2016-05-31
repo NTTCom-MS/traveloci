@@ -42,6 +42,7 @@ public class Travelo extends Builder {
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
         InputStream input;
         boolean ret=true;
+        boolean subjobstatus=false;
         Proc child=null;
         PrintStream logger = listener.getLogger();
         
@@ -100,6 +101,8 @@ public class Travelo extends Builder {
                     Thread.sleep(2);
                 }
                 
+                subjobstatus=child.join() == 0;
+                
                 if(child.join() != 0)
                     ret=false;
             }
@@ -139,7 +142,7 @@ public class Travelo extends Builder {
             Long endTime = System.currentTimeMillis();        
             
             logger.println("Total time spent: "+(endTime-startTime)+" ms");
-            logger.println("Job status: "+(ret?"OK":"FAILED"));
+            logger.println("Job status: "+(subjobstatus?"OK":"FAILED"));
             
             logger.println();
             logger.flush();
