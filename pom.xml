@@ -8,7 +8,7 @@
 
   <groupId>es.systemadmin</groupId>
   <artifactId>traveloci</artifactId>
-  <version>1.5</version>
+  <version>2.0</version>
   <packaging>hpi</packaging>
 
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
