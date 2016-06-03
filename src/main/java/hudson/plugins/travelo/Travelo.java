@@ -1,28 +1,20 @@
 package hudson.plugins.travelo;
 
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Proc;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
-import hudson.util.ArgumentListBuilder;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -124,7 +116,7 @@ public class Travelo extends Builder {
         }
         
         for (int i = 0; i < subjobs.size(); i++) {
-            logger.println(" == JOB "+i+" ==");
+            logger.println(" #### JOB "+i+" ####");
             logger.println(" OUTPUT: ");
             logger.println();
             logger.println(subjobs.get(i).getOutput());
