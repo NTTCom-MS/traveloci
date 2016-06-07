@@ -62,6 +62,10 @@ public class TraveloSubJob {
     public boolean isRunning() {
         return this.running;
     }
+    
+    public boolean haveBeenStarted() {
+        return this.started;
+    }
 
     public Integer getReturnCode() {
         return returncode;
@@ -84,6 +88,7 @@ public class TraveloSubJob {
     private StreamBuildListener sbl = null;
     private String output = null;
     private boolean running = false;
+    private boolean started = false;
     private Integer returncode = 999;
     private String exception = null;
     private String lastcommand = null;
@@ -98,6 +103,8 @@ public class TraveloSubJob {
     {
         if(this.child!=null)
             return false;
+        
+        this.started=true;
 
         Pattern pattern = Pattern.compile("([a-zA-Z0-9_]*)=\"([^\"]*)\"");
         Matcher matcher = pattern.matcher(this.job.get("env"));
